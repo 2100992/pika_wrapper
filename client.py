@@ -252,7 +252,7 @@ class Client:
         time.sleep(random.random() * multiplier)
 
     def publish(self,
-                body: str,
+                body: bytes,
                 queue: Queue = None,
                 exchange: Exchange = None,
                 attempt: int = 0,
@@ -462,10 +462,11 @@ class Client:
                     'status': 'in_progress',
                     'body': body
                 }
-            ))
+            ).encode()
+            )
 
         return json.dumps(
             {
                 'status': 'Ok'
             }
-        )
+        ).encode()
