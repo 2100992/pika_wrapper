@@ -256,7 +256,6 @@ class Client:
                 queue: Queue = None,
                 exchange: Exchange = None,
                 attempt: int = 0,
-                reply_to_queue: Queue = None,
                 properties: pika.BasicProperties = pika.BasicProperties(),
                 ) -> bool:
 
@@ -280,9 +279,6 @@ class Client:
             _queue = ''
             _exchange = exchange.exchange
 
-        if reply_to_queue:
-            properties.reply_to = reply_to_queue.queue
-
         try:
             self.channel.basic_publish(
                 body=body,
@@ -301,7 +297,6 @@ class Client:
                                 queue=queue,
                                 exchange=exchange,
                                 attempt=attempt,
-                                reply_to_queue=reply_to_queue,
                                 properties=properties
                                 )
         else:
@@ -375,7 +370,6 @@ class Client:
                            method: Basic.Deliver,
                            properties: pika.BasicProperties,
                            body: bytes,
-                           connection: pika.BlockingConnection,
                            callback: callable = None,
                            reply_to: str = ''
                            ):
@@ -408,7 +402,6 @@ class Client:
                 method,
                 properties,
                 body,
-                connection,
                 callback,
                 reply_to
             )
