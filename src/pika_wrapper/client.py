@@ -314,7 +314,7 @@ class Client:
                             callback: callable = None,
                             reply_to: str = ''
                             ):
-
+#_____________________________________
         def __ack_message(channel: BlockingChannel,
                           delivery_tag
                           ) -> None:
@@ -333,6 +333,27 @@ class Client:
             callback_threadsafe = functools.partial(
                 __ack_message, channel, delivery_tag)
             connection.add_callback_threadsafe(callback_threadsafe)
+
+#_____________________________________
+        def __nack_message(channel: BlockingChannel,
+                          delivery_tag
+                          ) -> None:
+            '''
+            callback для передачи в threadsafe для правильного формирования
+            negative_acknowledgement в отдельном треде
+            '''
+            if channel.is_open:
+                channel.basic_nack(delivery_tag)
+            else:
+                logger.warning(
+                    f'    [*]    Channel {channel} is closed, there is no way to send a acknowledgement')
+                pass
+
+        def nack_threadsafe(delivery_tag: int):
+            callback_threadsafe = functools.partial(
+                __nack_message, channel, delivery_tag)
+            connection.add_callback_threadsafe(callback_threadsafe)
+#_____________________________________
 
         def __reply_message(channel: BlockingChannel,
                             body: str,
@@ -365,6 +386,7 @@ class Client:
                 ),
             )
             connection.add_callback_threadsafe(callback_threadsafe)
+#_____________________________________
 
         def thread_wrapper(channel: BlockingChannel,
                            method: Basic.Deliver,
@@ -377,24 +399,21 @@ class Client:
             # !!!!!!!!!!!!!!!!!!
             # Тут исполняется целевая функция
             try:
-                reply = callback(
+                success = callback(
                     body=body,
                     reply_threadsafe=reply_threadsafe
                 )
             except Exception as ex:
-                reply = json.dumps(
-                    {'error': str(ex)}
-                )
+                logger.error('    [*]    {ex}')
+                success = False
             # !!!!!!!!!!!!!!!!!!
 
-            # Если указана очередь для ответов, ответим
-            if properties.reply_to or reply_to:
-                if reply:
-                    reply_threadsafe(reply)
-
-            # После завершения функции вызываем callback для треда с коннкетом,
-            # позволяющий безопасно закрыть сообщение RabbitMQ
-            ack_threadsafe(method.delivery_tag)
+            # Если callback вернул False, или упал, вернем сообщение в очередь
+            if success == False:
+                nack_threadsafe(method.delivery_tag)
+            else:
+                ack_threadsafe(method.delivery_tag)
+#_____________________________________
 
         thread = threading.Thread(
             target=thread_wrapper,
@@ -459,8 +478,15 @@ class Client:
             ).encode()
             )
 
-        return json.dumps(
-            {
-                'status': 'Ok'
-            }
-        ).encode()
+        time.sleep(1)
+
+        if reply_threadsafe:
+            reply_threadsafe(body=json.dumps(
+                {
+                    'status': 'Ok'
+                    'body': body
+                }
+            ).encode()
+            )
+            
+        return True
