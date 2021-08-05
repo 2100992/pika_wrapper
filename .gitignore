@@ -1,2 +1,4 @@
 .venv
 *.pyc
+dist
+src/pika_wrapper.egg-info
