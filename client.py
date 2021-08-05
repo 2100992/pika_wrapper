@@ -389,7 +389,8 @@ class Client:
 
             # Если указана очередь для ответов, ответим
             if properties.reply_to or reply_to:
-                reply_threadsafe(reply)
+                if reply:
+                    reply_threadsafe(reply)
 
             # После завершения функции вызываем callback для треда с коннкетом,
             # позволяющий безопасно закрыть сообщение RabbitMQ
