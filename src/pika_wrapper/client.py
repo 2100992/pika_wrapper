@@ -483,7 +483,7 @@ class Client:
         if reply_threadsafe:
             reply_threadsafe(body=json.dumps(
                 {
-                    'status': 'Ok'
+                    'status': 'Ok',
                     'body': body
                 }
             ).encode()
