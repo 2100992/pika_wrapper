@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(name='pika-wrapper',
-      version='0.0.2',
+      version='0.0.3',
       author='MrShved',
       author_email='2100992@gmail.com',
       description='Simple wrapper around Pika to make it easier to work with.',
