@@ -404,7 +404,7 @@ class Client:
                     reply_threadsafe=reply_threadsafe
                 )
             except Exception as ex:
-                logger.error(f'    [*]    {ex}')
+                logger.error(f'    [*]    failed callback - "{ex}"')
                 success = False
             # !!!!!!!!!!!!!!!!!!
 
