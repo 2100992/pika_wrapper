@@ -5,7 +5,7 @@ import time
 import threading
 import random
 
-from typing import Dict
+from typing import Dict, Callable
 
 import pika
 from pika.spec import Basic
@@ -311,7 +311,7 @@ class Client:
                             properties: pika.BasicProperties,
                             body: bytes,
                             connection: pika.BlockingConnection,
-                            callback: callable = None,
+                            callback: Callable = None,
                             reply_to: str = ''
                             ):
 #_____________________________________
@@ -392,7 +392,7 @@ class Client:
                            method: Basic.Deliver,
                            properties: pika.BasicProperties,
                            body: bytes,
-                           callback: callable = None,
+                           callback: Callable = None,
                            reply_to: str = ''
                            ):
 
@@ -430,7 +430,7 @@ class Client:
 
     def setup_consumer(self,
                        queue: Queue,
-                       callback: callable = None,
+                       callback: Callable = None,
                        reply_to_queue: Queue = None
                        ):
 
@@ -466,7 +466,7 @@ class Client:
 
     @staticmethod
     def callback(body: bytes,
-                 reply_threadsafe: callable = None
+                 reply_threadsafe: Callable = None
                  ) -> str:
 
         if reply_threadsafe:
